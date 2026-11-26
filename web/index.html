@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>תמלול וסיכום</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2f5d8a">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{--bg:#f4f3ef;--card:#fff;--ink:#1f2328;--muted:#6b7280;--line:#e2dfd7;--accent:#2f5d8a;--accent-ink:#fff;--rec:#c0392b;--ok:#2e7d4f;--warn:#b7791f;--field:#fafaf8}
+  @media (prefers-color-scheme:dark){:root{--bg:#15171a;--card:#1e2125;--ink:#e8e8e6;--muted:#9aa0a6;--line:#33373c;--accent:#6aa3d8;--accent-ink:#0f1a26;--rec:#e5604f;--ok:#5cc08a;--warn:#e0a94a;--field:#17191c}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:14px 12px 80px}
+  header{display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px}
+  h1{font-size:21px;margin:0}
+  h2{font-size:16px;margin:0 0 10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+  button,select,input[type=text],input[type=password],textarea{font:inherit;color:var(--ink)}
+  button{cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--card);padding:9px 14px}
+  button:hover{border-color:var(--accent)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .ghost{background:transparent}
+  .small{padding:5px 10px;font-size:14px}
+  .rec{width:100%;font-size:19px;padding:16px;background:var(--accent);color:var(--accent-ink);border:none;border-radius:14px}
+  .rec.on{background:var(--rec);animation:pulse 1.5s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(192,57,43,.4)}70%{box-shadow:0 0 0 14px rgba(192,57,43,0)}100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+  .row>.grow{flex:1}
+  select,input[type=text],input[type=password]{padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--field);max-width:100%}
+  textarea{width:100%;min-height:150px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--field)}
+  .out{white-space:pre-wrap;border:1px solid var(--line);border-radius:10px;padding:10px;min-height:56px;background:var(--field)}
+  .out:empty::before{content:attr(data-empty);color:var(--muted)}
+  #timer{text-align:center;font-size:18px;margin:10px 0 4px;font-variant-numeric:tabular-nums}
+  .meter{position:relative;height:18px;border-radius:9px;background:var(--field);border:1px solid var(--line);overflow:hidden;direction:ltr}
+  #fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--ok);transition:width .08s linear}
+  #fill.hot{background:var(--warn)}#fill.clip{background:var(--rec)}
+  #peak{position:absolute;top:0;bottom:0;width:3px;background:var(--ink);opacity:.5;left:0}
+  .mrow{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:8px}
+  #mdb{font-variant-numeric:tabular-nums;color:var(--muted);direction:ltr}
+  .chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;background:var(--field);border:1px solid var(--line);color:var(--muted)}
+  .chip.ok{color:var(--ok);border-color:var(--ok)}.chip.warn{color:var(--warn);border-color:var(--warn)}.chip.bad{color:var(--rec);border-color:var(--rec)}
+  .banner{border-radius:10px;padding:10px 12px;margin-top:10px;font-size:15px}
+  .banner.warn{background:rgba(183,121,31,.15);border:1px solid var(--warn)}
+  .banner.bad{background:rgba(192,57,43,.12);border:1px solid var(--rec)}
+  video{width:100%;max-height:240px;border-radius:10px;background:#000;margin-top:8px}
+  audio{width:100%;margin-top:6px}
+  .item{display:flex;align-items:center;gap:8px;padding:9px 6px;border-top:1px solid var(--line);cursor:pointer;border-radius:8px}
+  .item:first-of-type{border-top:none}
+  .item.sel{background:rgba(47,93,138,.12)}
+  .item .t{flex:1;min-width:0}.item .m{color:var(--muted);font-size:13px}
+  .files{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .file{display:flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:3px 6px 3px 10px;font-size:13px;background:var(--field)}
+  .file button{padding:0 6px;border:none;background:transparent;font-size:16px;line-height:1.2}
+  .muted{color:var(--muted);font-size:13px}
+  .st{color:var(--muted);font-size:13px;min-height:18px;margin-top:4px}
+  .err{color:var(--rec)}
+  label.ck{display:inline-flex;gap:6px;align-items:center}
+  #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:10px;max-width:90%;font-size:14px;display:none;z-index:50}
+  dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);width:min(92vw,460px);padding:16px}
+  dialog::backdrop{background:rgba(0,0,0,.45)}
+  dialog label{display:block;margin-top:10px;font-size:14px;color:var(--muted)}
+  dialog input,dialog select{width:100%;margin-top:3px}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>🎙️ תמלול וסיכום</h1>
+    <button id="setBtn" class="ghost small">הגדרות</button>
+  </header>
+
+  <section class="card" id="recCard">
+    <h2>הקלטה</h2>
+    <div class="row">
+      <label class="ck"><input type="checkbox" id="wantVideo"> הקלט גם וידאו</label>
+      <select id="facing" hidden>
+        <option value="environment">מצלמה אחורית</option>
+        <option value="user">מצלמה קדמית</option>
+      </select>
+    </div>
+    <video id="pv" muted playsinline hidden></video>
+    <button id="recBtn" class="rec" style="margin-top:10px">● התחל הקלטה</button>
+    <div id="timer">00:00</div>
+    <div class="meterWrap">
+      <div class="meter"><div id="fill"></div><div id="peak"></div></div>
+      <div class="mrow"><span id="mstat" class="chip">לא מקליט</span><span id="mdb">— dB</span></div>
+    </div>
+    <div class="row"><span id="wlChip" class="chip">מסך: רגיל</span><span class="muted">ההקלטה נשמרת בדפדפן ואפשר לתמלל אחר כך</span></div>
+    <div id="warnBox" class="banner warn" hidden>
+      <div id="warnTxt"></div>
+      <button id="extBtn" class="primary" style="margin-top:8px">הארך ב-30 דקות</button>
+    </div>
+    <div id="bgBox" class="banner bad" hidden>הדף ברקע. בדפדפן ההקלטה עלולה להיפסק. חזור לדף כדי להמשיך.</div>
+    <div id="recErr" class="st err"></div>
+  </section>
+
+  <section class="card">
+    <h2>ההקלטות שלי</h2>
+    <div id="list"></div>
+    <div id="listEmpty" class="muted">עדיין אין הקלטות</div>
+  </section>
+
+  <div id="selWrap" hidden>
+    <section class="card">
+      <h2>ההקלטה הנבחרת</h2>
+      <div id="selName" class="muted"></div>
+      <audio id="player" controls></audio>
+      <div id="segInfo" class="muted"></div>
+      <video id="vplayer" controls playsinline hidden></video>
+      <div class="row">
+        <button id="trBtn" class="primary">תמלל</button>
+        <span class="muted">תמלול נעשה רק כשאתה מבקש</span>
+      </div>
+      <div id="trSt" class="st"></div>
+      <textarea id="transcript" dir="auto" placeholder="התמלול יופיע כאן. אפשר גם להקליד או להדביק טקסט."></textarea>
+    </section>
+
+    <section class="card">
+      <h2>קבצים לניתוח (לא חובה)</h2>
+      <div class="muted">תמונות, PDF, DOCX וקבצי טקסט. הם יינתחו יחד עם התמלול.</div>
+      <div class="row"><input type="file" id="fileIn" multiple accept="image/*,application/pdf,.pdf,.docx,.txt,.md,.csv,.json,.srt,.html,.log,.xml"></div>
+      <div id="files" class="files"></div>
+      <div id="fileSt" class="st"></div>
+    </section>
+
+    <section class="card">
+      <h2>סיכום וניתוח</h2>
+      <div class="row">
+        <select id="sumStyle">
+          <option value="bullets">נקודות עיקריות, החלטות ומשימות</option>
+          <option value="short">סיכום קצר</option>
+          <option value="detailed">סיכום מפורט</option>
+          <option value="files">ניתוח הקבצים מול מה שנאמר</option>
+        </select>
+      </div>
+      <input type="text" id="instr" class="grow" style="width:100%" placeholder="הנחיה או שאלה לניתוח (לא חובה)">
+      <div class="row"><button id="sumBtn" class="primary">סכם / נתח</button></div>
+      <div id="sumSt" class="st"></div>
+      <div id="summary" class="out" dir="auto" data-empty="הסיכום יופיע כאן"></div>
+    </section>
+
+    <section class="card">
+      <h2>תרגום (עברית ↔ אנגלית)</h2>
+      <div class="row">
+        <select id="trSrc"><option value="transcript">תרגם את התמלול</option><option value="summary">תרגם את הסיכום</option></select>
+        <button id="toEn">תרגם לאנגלית</button>
+        <button id="toHe">תרגם לעברית</button>
+      </div>
+      <div id="tlSt" class="st"></div>
+      <div id="translation" class="out" dir="auto" data-empty="התרגום יופיע כאן"></div>
+    </section>
+
+    <section class="card">
+      <h2>שיתוף וייצוא</h2>
+      <div class="row">
+        <label class="ck"><input type="checkbox" id="xTr" checked> תמלול</label>
+        <label class="ck"><input type="checkbox" id="xSum" checked> סיכום</label>
+        <label class="ck"><input type="checkbox" id="xTl"> תרגום</label>
+        <label class="ck"><input type="checkbox" id="xAu"> שמע</label>
+        <label class="ck" id="xViWrap" hidden><input type="checkbox" id="xVi"> וידאו</label>
+      </div>
+      <div class="row">
+        <select id="xFmt">
+          <option value="docx">Word (DOCX)</option>
+          <option value="txt">טקסט (TXT)</option>
+          <option value="md">Markdown (MD)</option>
+          <option value="html">דף אינטרנט (HTML)</option>
+        </select>
+        <button id="shBtn" class="primary">שתף</button>
+        <button id="dlBtn">הורד</button>
+        <button id="cpBtn">העתק טקסט</button>
+      </div>
+      <div id="shSt" class="st"></div>
+    </section>
+
+    <section class="card">
+      <button id="delBtn" class="small">מחק את ההקלטה הזו</button>
+    </section>
+  </div>
+</main>
+
+<dialog id="dlg">
+  <h2>הגדרות</h2>
+  <label>מפתח Claude (לסיכום, ניתוח ותרגום)<input type="password" id="sCkey" placeholder="sk-ant-..." autocomplete="off"></label>
+  <label>מודל Claude<input type="text" id="sCmodel" dir="ltr"></label>
+  <label>כתובת שירות התמלול (תואם OpenAI)<input type="text" id="sTbase" dir="ltr"></label>
+  <label>מפתח שירות התמלול (Groq: gsk_...)<input type="password" id="sTkey" autocomplete="off"></label>
+  <label>מודל תמלול<input type="text" id="sTmodel" dir="ltr"></label>
+  <label>שפת התמלול
+    <select id="sTlang"><option value="he">עברית</option><option value="en">English</option><option value="auto">זיהוי אוטומטי</option></select>
+  </label>
+  <div class="muted" style="margin-top:10px">המפתחות נשמרים בדפדפן הזה בלבד. אל תשתמש בכלי הזה במכשיר של מישהו אחר.</div>
+  <div class="row" style="margin-top:12px"><button id="sSave" class="primary">שמור</button><button id="sClose">סגור</button></div>
+</dialog>
+<div id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const LIMIT=60*60e3, EXT=30*60e3, WARN=5*60e3, SEG_MS=60*60e3, SLICE=10000;
+const DEF={cmodel:'claude-sonnet-5-5',tbase:'https://api.groq.com/openai/v1',tmodel:'whisper-large-v3-turbo',tlang:'he'};
+
+/* ---------- settings (localStorage, best effort) ---------- */
+const cfg={
+  get(k,d){try{const v=localStorage.getItem('vn_'+k);return v===null?d:v}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('vn_'+k,v)}catch(e){}}
+};
+
+/* ---------- small helpers ---------- */
+let toastT;
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>e.style.display='none',4500)}
+function fmtDur(ms){ms=Math.max(0,ms);const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;const p=n=>String(n).padStart(2,'0');return (h?h+':':'')+p(m)+':'+p(r)}
+function fmtSize(b){return b>1048576?(b/1048576).toFixed(1)+'MB':Math.max(1,Math.round(b/1024))+'KB'}
+function fileStamp(id){const d=new Date(id),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+'-'+p(d.getMinutes())}
+function dispName(id){return new Date(id).toLocaleString('he-IL',{dateStyle:'short',timeStyle:'short'})}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function pickMime(list){try{return list.find(m=>MediaRecorder.isTypeSupported(m))||''}catch(e){return ''}}
+function extOf(mime,kind){mime=(mime||'').toLowerCase();if(mime.includes('webm'))return 'webm';if(mime.includes('mp4'))return kind==='video'?'mp4':'m4a';if(mime.includes('ogg'))return 'ogg';return kind==='video'?'webm':'webm'}
+function baseMime(m){return (m||'').split(';')[0]||'application/octet-stream'}
+function beep(){try{const ac=(S&&S.ac)||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=.15;o.connect(g);g.connect(ac.destination);o.start();setTimeout(()=>o.stop(),400)}catch(e){}}
+
+/* ---------- IndexedDB ---------- */
+let dbp;
+function db(){return dbp||(dbp=new Promise((res,rej)=>{const r=indexedDB.open('voicenotes',1);r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('rec',{keyPath:'id'});d.createObjectStore('chunks',{autoIncrement:true})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))}
+async function tx(store,mode,fn){const d=await db();return new Promise((res,rej)=>{const t=d.transaction(store,mode);let req;try{req=fn(t.objectStore(store))}catch(e){rej(e);return}t.oncomplete=()=>res(req&&req.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)})}
+const putRec=r=>tx('rec','readwrite',s=>s.put(r));
+const allRec=()=>tx('rec','readonly',s=>s.getAll());
+const delRec=id=>tx('rec','readwrite',s=>s.delete(id));
+const addChunk=c=>tx('chunks','readwrite',s=>s.add(c));
+const allChunks=()=>tx('chunks','readonly',s=>s.getAll());
+async function delChunks(recId){const d=await db();return new Promise((res,rej)=>{const t=d.transaction('chunks','readwrite');const c=t.objectStore('chunks').openCursor();c.onsuccess=()=>{const cur=c.result;if(cur){if(cur.value.rec===recId)cur.delete();cur.continue()}};t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+
+/* ---------- state ---------- */
+let S=null;      // active recording session
+let cur=null;    // selected record
+let wl=null;     // wake lock
+let urls=[];
+
+/* ---------- wake lock ---------- */
+async function lockScreen(){
+  if(!('wakeLock' in navigator)){setChip('wlChip','מסך: אין תמיכה בנעילה','warn');return}
+  try{wl=await navigator.wakeLock.request('screen');setChip('wlChip','מסך נשאר דלוק','ok');wl.addEventListener('release',()=>{if(S)setChip('wlChip','מסך: הנעילה שוחררה','warn')})}
+  catch(e){setChip('wlChip','מסך: לא הצלחתי לנעול','warn')}
+}
+function unlockScreen(){try{wl&&wl.release()}catch(e){}wl=null;setChip('wlChip','מסך: רגיל','')}
+function setChip(id,t,cls){const e=$(id);e.textContent=t;e.className='chip'+(cls?' '+cls:'')}
+document.addEventListener('visibilitychange',()=>{
+  if(!S)return;
+  if(document.visibilityState==='visible'){$('bgBox').hidden=true;lockScreen()}else{$('bgBox').hidden=false}
+});
+window.addEventListener('beforeunload',e=>{if(S){e.preventDefault();e.returnValue=''}});
+
+/* ---------- recording ---------- */
+function startAudioSeg(){
+  const s=S,as=new MediaStream(s.stream.getAudioTracks());
+  const mime=pickMime(['audio/webm;codecs=opus','audio/webm','audio/mp4']);
+  const o={audioBitsPerSecond:32000};if(mime)o.mimeType=mime;
+  const mr=new MediaRecorder(as,o);
+  const seg={n:s.audioSegs.length,chunks:[],mime:mr.mimeType||mime||'audio/webm',mr,startedAt:Date.now()};
+  s.audioSegs.push(seg);
+  seg.done=new Promise(r=>{mr.onstop=r});
+  mr.ondataavailable=e=>{if(e.data&&e.data.size){seg.chunks.push(e.data);addChunk({rec:s.id,kind:'a',seg:seg.n,blob:e.data}).catch(()=>{if(!s.saveErr){s.saveErr=true;$('recErr').textContent='אזהרה: אין מקום לשמור גיבוי ביניים בדפדפן'}})}};
+  mr.start(SLICE);s.curSeg=seg;
+}
+async function startRec(){
+  if(S)return;
+  $('recErr').textContent='';
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||typeof MediaRecorder==='undefined'){$('recErr').textContent='הדפדפן לא תומך בהקלטה. השתמש ב-Chrome דרך כתובת HTTPS.';return}
+  const wantVideo=$('wantVideo').checked;
+  let stream;
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:wantVideo?{facingMode:$('facing').value,width:{ideal:640},height:{ideal:480}}:false});
+  }catch(e){
+    $('recErr').textContent=(e&&e.name==='NotAllowedError')?'לא ניתנה הרשאה למיקרופון'+(wantVideo?' או למצלמה':'')+'. אפשר לאשר בהגדרות האתר בדפדפן.':'לא הצלחתי לפתוח את המיקרופון'+(wantVideo?'/המצלמה':'')+': '+(e&&e.name||'');
+    return;
+  }
+  const id=Date.now();
+  const rec={id,created:id,status:'recording',audio:[],video:[],durationMs:0,transcript:'',summary:'',translation:'',files:[]};
+  try{await putRec(rec)}catch(e){}
+  S={id,rec,stream,start:Date.now(),deadline:Date.now()+LIMIT,warned:false,audioSegs:[],lvl:-100,peak:-100,lastSound:Date.now()};
+  stream.getAudioTracks().forEach(t=>{t.onended=()=>stopRec()});
+  startAudioSeg();
+  if(wantVideo&&stream.getVideoTracks().length){
+    const vm=pickMime(['video/webm;codecs=vp8,opus','video/webm','video/mp4']);
+    const vo={videoBitsPerSecond:600000,audioBitsPerSecond:32000};if(vm)vo.mimeType=vm;
+    const vr=new MediaRecorder(stream,vo);
+    const v={chunks:[],mime:vr.mimeType||vm||'video/webm',mr:vr};
+    v.done=new Promise(r=>{vr.onstop=r});
+    vr.ondataavailable=e=>{if(e.data&&e.data.size){v.chunks.push(e.data);addChunk({rec:id,kind:'v',seg:0,blob:e.data}).catch(()=>{})}};
+    vr.start(SLICE);S.v=v;
+    const pv=$('pv');pv.srcObject=new MediaStream(stream.getVideoTracks());pv.hidden=false;pv.play().catch(()=>{});
+  }
+  try{
+    const ac=new (window.AudioContext||window.webkitAudioContext)();await ac.resume().catch(()=>{});
+    const an=ac.createAnalyser();an.fftSize=2048;
+    ac.createMediaStreamSource(new MediaStream(stream.getAudioTracks())).connect(an);
+    S.ac=ac;S.an=an;S.buf=new Float32Array(an.fftSize);
+  }catch(e){}
+  S.meterT=setInterval(meterTick,100);
+  S.tickT=setInterval(tick,1000);
+  $('recBtn').textContent='■ עצור הקלטה';$('recBtn').classList.add('on');
+  $('wantVideo').disabled=true;$('facing').disabled=true;
+  lockScreen();tick();
+}
+function meterTick(){
+  const s=S;if(!s)return;
+  const tr=s.stream.getAudioTracks()[0];
+  let db=-100;
+  if(s.an){s.an.getFloatTimeDomainData(s.buf);let sum=0,pk=0;for(let i=0;i<s.buf.length;i++){const v=s.buf[i];sum+=v*v;const a=v<0?-v:v;if(a>pk)pk=a}const rms=Math.sqrt(sum/s.buf.length);db=rms>0?20*Math.log10(rms):-100;if(pk>0){const pdb=20*Math.log10(pk);s.peak=Math.max(pdb,s.peak-1.5)}}
+  s.lvl=Math.max(db,s.lvl-4);
+  const pct=v=>Math.max(0,Math.min(100,(Math.max(-70,Math.min(0,v))+70)/70*100));
+  const f=$('fill');f.style.width=pct(s.lvl)+'%';f.className=s.lvl>-3?'clip':(s.lvl>-12?'hot':'');
+  $('peak').style.left=Math.min(97,pct(s.peak))+'%';
+  $('mdb').textContent=(s.lvl<=-90?'−∞':Math.round(s.lvl))+' dB';
+  if(db>-55)s.lastSound=Date.now();
+  if(!tr||tr.readyState!=='live'||tr.muted||!tr.enabled){setChip('mstat','המיקרופון לא פעיל','bad')}
+  else{const q=Math.round((Date.now()-s.lastSound)/1000);if(q>=8)setChip('mstat','לא נקלט קול כבר '+q+' שניות','warn');else if(Date.now()-s.lastSound<2000)setChip('mstat','שומע ✓','ok');else setChip('mstat','שקט','')}
+}
+function tick(){
+  const s=S;if(!s||s.stopping)return;
+  const now=Date.now(),left=s.deadline-now;
+  $('timer').textContent='מוקלט '+fmtDur(now-s.start)+'  ·  נותרו '+fmtDur(left);
+  if(left<=0){beep();toast('ההקלטה הופסקה: הגעת למגבלת הזמן');stopRec();return}
+  if(left<=WARN){
+    $('warnBox').hidden=false;$('warnTxt').textContent='ההקלטה תיפסק בעוד '+fmtDur(left);
+    if(!s.warned){s.warned=true;beep();try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}}
+  }
+  if(now-s.curSeg.startedAt>=SEG_MS&&!s.stopping){const old=s.curSeg;startAudioSeg();try{old.mr.stop()}catch(e){}}
+}
+function extend(){
+  if(!S)return;S.deadline+=EXT;S.warned=false;$('warnBox').hidden=true;toast('ההקלטה הוארכה ב-30 דקות');tick();
+}
+async function stopRec(){
+  const s=S;if(!s||s.stopping)return;s.stopping=true;
+  clearInterval(s.meterT);clearInterval(s.tickT);
+  try{if(s.curSeg.mr.state!=='inactive')s.curSeg.mr.stop()}catch(e){}
+  try{if(s.v&&s.v.mr.state!=='inactive')s.v.mr.stop()}catch(e){}
+  await Promise.all([...s.audioSegs.map(x=>x.done),s.v&&s.v.done].filter(Boolean));
+  s.stream.getTracks().forEach(t=>t.stop());
+  try{s.ac&&s.ac.close()}catch(e){}
+  const rec=s.rec;
+  rec.audio=s.audioSegs.map(x=>new Blob(x.chunks,{type:x.mime})).filter(b=>b.size>0);
+  rec.video=s.v&&s.v.chunks.length?[new Blob(s.v.chunks,{type:s.v.mime})]:[];
+  rec.durationMs=Date.now()-s.start;rec.status='done';
+  try{await putRec(rec);await delChunks(rec.id)}catch(e){toast('שמירת ההקלטה בדפדפן נכשלה')}
+  S=null;
+  unlockScreen();
+  const pv=$('pv');pv.srcObject=null;pv.hidden=true;
+  $('recBtn').textContent='● התחל הקלטה';$('recBtn').classList.remove('on');
+  $('wantVideo').disabled=false;$('facing').disabled=false;
+  $('warnBox').hidden=true;$('bgBox').hidden=true;
+  $('fill').style.width='0';$('peak').style.left='0';$('mdb').textContent='— dB';setChip('mstat','לא מקליט','');
+  $('timer').textContent='00:00';
+  await refreshList();await select(rec.id);
+  if(!rec.audio.length)toast('לא נקלט שמע בהקלטה הזו');
+}
+async function recoverUnfinished(){
+  let recs,chunks;try{recs=await allRec();chunks=await allChunks()}catch(e){return}
+  for(const r of recs){
+    if(r.status!=='recording'||(S&&S.id===r.id))continue;
+    const mine=chunks.filter(c=>c.rec===r.id);
+    if(!mine.length){await delRec(r.id).catch(()=>{});continue}
+    const group=k=>{const g={};mine.filter(c=>c.kind===k).forEach(c=>(g[c.seg]=g[c.seg]||[]).push(c.blob));return Object.keys(g).sort((a,b)=>a-b).map(i=>new Blob(g[i],{type:g[i][0].type}))};
+    r.audio=group('a');r.video=group('v');r.status='done';r.recovered=true;r.durationMs=mine.filter(c=>c.kind==='a').length*SLICE;
+    await putRec(r).catch(()=>{});await delChunks(r.id).catch(()=>{});
+  }
+}
+
+/* ---------- list + selection ---------- */
+async function refreshList(){
+  const recs=(await allRec().catch(()=>[])).filter(r=>r.status==='done').sort((a,b)=>b.id-a.id);
+  const box=$('list');box.textContent='';
+  $('listEmpty').hidden=recs.length>0;
+  for(const r of recs){
+    const d=document.createElement('div');d.className='item'+(cur&&cur.id===r.id?' sel':'');
+    const t=document.createElement('div');t.className='t';
+    const n=document.createElement('div');n.textContent=dispName(r.id)+(r.recovered?' (שוחזרה)':'');
+    const m=document.createElement('div');m.className='m';
+    const sz=r.audio.reduce((a,b)=>a+b.size,0)+r.video.reduce((a,b)=>a+b.size,0);
+    m.textContent=fmtDur(r.durationMs)+' · '+fmtSize(sz)+(r.video.length?' · כולל וידאו':'')+(r.transcript?' · יש תמלול':'');
+    t.append(n,m);d.append(t);d.onclick=()=>select(r.id);box.appendChild(d);
+  }
+}
+async function select(id){
+  const recs=await allRec().catch(()=>[]);const r=recs.find(x=>x.id===id);if(!r)return;
+  cur=r;urls.forEach(u=>URL.revokeObjectURL(u));urls=[];
+  $('selWrap').hidden=false;$('selName').textContent=dispName(r.id)+' · '+fmtDur(r.durationMs);
+  playQueue(r.audio);
+  const vp=$('vplayer');
+  if(r.video.length){const u=URL.createObjectURL(r.video[0]);urls.push(u);vp.src=u;vp.hidden=false}else{vp.removeAttribute('src');vp.hidden=true}
+  $('xViWrap').hidden=!r.video.length;$('xVi').checked=false;
+  $('transcript').value=r.transcript||'';$('summary').textContent=r.summary||'';$('translation').textContent=r.translation||'';
+  ['trSt','sumSt','tlSt','shSt','fileSt'].forEach(i=>$(i).textContent='');
+  renderFiles();refreshList();
+}
+function playQueue(blobs){
+  const a=$('player');let i=0;
+  const load=()=>{const u=URL.createObjectURL(blobs[i]);urls.push(u);a.src=u;$('segInfo').textContent=blobs.length>1?'קטע '+(i+1)+' מתוך '+blobs.length:''};
+  a.onended=()=>{if(i<blobs.length-1){i++;load();a.play().catch(()=>{})}};
+  if(blobs.length)load();else{a.removeAttribute('src');$('segInfo').textContent='אין שמע בהקלטה הזו'}
+}
+let saveT;
+function saveSoon(){clearTimeout(saveT);saveT=setTimeout(()=>{if(cur)putRec(cur).then(refreshList).catch(()=>{})},500)}
+$('transcript').oninput=()=>{if(cur){cur.transcript=$('transcript').value;saveSoon()}};
+
+/* ---------- transcription (only on request) ---------- */
+async function transcribe(){
+  const r=cur;if(!r)return;
+  if(!r.audio.length){$('trSt').textContent='אין שמע לתמלל';return}
+  const key=cfg.get('tkey','');
+  if(!key){openSettings();toast('חסר מפתח לשירות התמלול');return}
+  const base=cfg.get('tbase',DEF.tbase).replace(/\/+$/,''),model=cfg.get('tmodel',DEF.tmodel),lang=cfg.get('tlang',DEF.tlang);
+  const btn=$('trBtn');btn.disabled=true;$('trSt').className='st';
+  try{
+    const parts=[];
+    for(let i=0;i<r.audio.length;i++){
+      const b=r.audio[i];
+      $('trSt').textContent='מתמלל קטע '+(i+1)+' מתוך '+r.audio.length+'…';
+      if(b.size>25*1024*1024)throw new Error('הקטע גדול מ-25MB ואי אפשר לשלוח אותו');
+      const mt=baseMime(b.type);
+      const fd=new FormData();
+      fd.append('file',new File([b],'audio.'+extOf(mt,'audio'),{type:mt}));
+      fd.append('model',model);if(lang!=='auto')fd.append('language',lang);fd.append('response_format','json');
+      const res=await fetch(base+'/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+key},body:fd});
+      const j=await res.json().catch(()=>({}));
+      if(!res.ok)throw new Error((j.error&&j.error.message)||('שגיאה '+res.status));
+      parts.push((j.text||'').trim());
+    }
+    const text=parts.join(' ').trim();
+    if(!text){$('trSt').textContent='לא התקבל טקסט (ייתכן שההקלטה שקטה)';return}
+    const old=$('transcript').value.trim();
+    let out=text;
+    if(old){out=confirm('כבר יש תמלול. אישור = להחליף אותו. ביטול = להוסיף את החדש בסוף.')?text:old+'\n\n'+text}
+    $('transcript').value=out;r.transcript=out;await putRec(r);refreshList();
+    $('trSt').textContent='התמלול מוכן';
+  }catch(e){$('trSt').className='st err';$('trSt').textContent=e.message||'שגיאה בתמלול'}
+  finally{btn.disabled=false}
+}
+
+/* ---------- attachments ---------- */
+function renderFiles(){
+  const box=$('files');box.textContent='';
+  (cur?cur.files:[]).forEach((f,i)=>{
+    const d=document.createElement('div');d.className='file';
+    const s=document.createElement('span');s.textContent=f.name+' ('+fmtSize(f.blob.size)+')';
+    const x=document.createElement('button');x.textContent='×';x.setAttribute('aria-label','הסר');
+    x.onclick=()=>{cur.files.splice(i,1);putRec(cur);renderFiles()};
+    d.append(s,x);box.appendChild(d);
+  });
+}
+$('fileIn').onchange=async e=>{
+  if(!cur){e.target.value='';return}
+  for(const f of e.target.files){
+    if(f.size>30*1024*1024){$('fileSt').textContent='הקובץ '+f.name+' גדול מ-30MB';continue}
+    cur.files.push({name:f.name,type:f.type,blob:f});
+  }
+  e.target.value='';await putRec(cur).catch(()=>{});renderFiles();
+};
+function b64(blob){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=()=>rej(r.error);r.readAsDataURL(blob)})}
+async function imageBlock(f){
+  const bmp=await createImageBitmap(f.blob);
+  const sc=Math.min(1,1568/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas');c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  const jb=await new Promise(r=>c.toBlob(r,'image/jpeg',0.85));
+  return {type:'image',source:{type:'base64',media_type:'image/jpeg',data:await b64(jb)}};
+}
+async function unzipEntry(buf,wanted){
+  const dv=new DataView(buf);let i=buf.byteLength-22;
+  while(i>=0&&dv.getUint32(i,true)!==0x06054b50)i--;
+  if(i<0)return null;
+  const cnt=dv.getUint16(i+10,true);let off=dv.getUint32(i+16,true);
+  for(let n=0;n<cnt;n++){
+    if(dv.getUint32(off,true)!==0x02014b50)break;
+    const method=dv.getUint16(off+10,true),csize=dv.getUint32(off+20,true),nl=dv.getUint16(off+28,true),el=dv.getUint16(off+30,true),cl=dv.getUint16(off+32,true),lho=dv.getUint32(off+42,true);
+    const name=new TextDecoder().decode(new Uint8Array(buf,off+46,nl));
+    if(name===wanted){
+      const start=lho+30+dv.getUint16(lho+26,true)+dv.getUint16(lho+28,true);
+      const data=new Uint8Array(buf,start,csize);
+      if(method===0)return data;
+      if(method===8){const st=new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));return new Uint8Array(await new Response(st).arrayBuffer())}
+    }
+    off+=46+nl+el+cl;
+  }
+  return null;
+}
+async function docxText(blob){
+  const data=await unzipEntry(await blob.arrayBuffer(),'word/document.xml');
+  if(!data)throw new Error('לא הצלחתי לקרוא את קובץ ה-DOCX');
+  const doc=new DOMParser().parseFromString(new TextDecoder().decode(data),'application/xml');
+  const out=[];
+  for(const p of doc.getElementsByTagName('w:p')){let t='';for(const n of p.getElementsByTagName('*')){if(n.nodeName==='w:t')t+=n.textContent;else if(n.nodeName==='w:tab')t+='\t';else if(n.nodeName==='w:br')t+='\n'}out.push(t)}
+  return out.join('\n');
+}
+async function fileBlocks(f){
+  const n=f.name.toLowerCase(),t=(f.type||'').toLowerCase();
+  if(t.startsWith('image/'))return [await imageBlock(f)];
+  if(t==='application/pdf'||n.endsWith('.pdf'))return [{type:'document',source:{type:'base64',media_type:'application/pdf',data:await b64(f.blob)}}];
+  if(n.endsWith('.docx'))return [{type:'text',text:'<file name="'+f.name+'">\n'+await docxText(f.blob)+'\n</file>'}];
+  if(/\.(txt|md|csv|json|srt|html|log|xml)$/.test(n)||t.startsWith('text/'))return [{type:'text',text:'<file name="'+f.name+'">\n'+await f.blob.text()+'\n</file>'}];
+  throw new Error('סוג קובץ לא נתמך: '+f.name+' (אפשר לייצא ל-PDF)');
+}
+
+/* ---------- Claude ---------- */
+async function claude(system,content,maxTokens){
+  const key=cfg.get('ckey','');
+  if(!key){openSettings();throw new Error('חסר מפתח Claude בהגדרות')}
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:cfg.get('cmodel',DEF.cmodel),max_tokens:maxTokens||4000,system,messages:[{role:'user',content}]})});
+  const j=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error((j.error&&j.error.message)||('שגיאה '+res.status));
+  return (j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+}
+const STYLES={
+  bullets:'Write: a one-line topic; main points; decisions; action items (with owner and deadline if mentioned); open questions. Skip any section that would be empty.',
+  short:'Write a short summary of 2 to 3 sentences.',
+  detailed:'Write a detailed summary organized by topic with short headings, ending with decisions and action items if any.',
+  files:'Analyze the attached files against what was said in the discussion: point out what matches, what conflicts, what is missing, and what follows from it.'
+};
+async function summarize(){
+  if(!cur)return;
+  const text=$('transcript').value.trim(),hasFiles=cur.files.length>0;
+  if(!text&&!hasFiles){$('sumSt').className='st err';$('sumSt').textContent='אין תמלול או קבצים לסכם';return}
+  const btn=$('sumBtn');btn.disabled=true;$('sumSt').className='st';$('sumSt').textContent='מכין…';
+  try{
+    const content=[];
+    for(const f of cur.files){$('sumSt').textContent='קורא את '+f.name+'…';content.push(...await fileBlocks(f))}
+    const instr=$('instr').value.trim();
+    let msg='';
+    if(text)msg+='<transcript>\n'+text+'\n</transcript>\n';
+    if(instr)msg+='<user_request>\n'+instr+'\n</user_request>\n';
+    content.push({type:'text',text:msg||'Please analyze the attached files.'});
+    const system='You help the person who recorded a discussion or meeting. The transcript comes from automatic speech recognition: it may contain errors and missing punctuation, so silently fix what is clear from context. Any attached files are material for the same discussion. Write in the same language as the transcript (Hebrew or English); if there is no transcript, write in Hebrew. Plain text only, no markdown symbols, use "•" for bullets. '+STYLES[$('sumStyle').value]+(instr?' Also follow the user request.':'')+' Return only the result.';
+    $('sumSt').textContent='Claude עובד…';
+    const out=await claude(system,content,4000);
+    $('summary').textContent=out;cur.summary=out;await putRec(cur);$('sumSt').textContent='';
+  }catch(e){$('sumSt').className='st err';$('sumSt').textContent=e.message||'שגיאה'}
+  finally{btn.disabled=false}
+}
+async function translate(target){
+  if(!cur)return;
+  const src=$('trSrc').value==='summary'?$('summary').textContent.trim():$('transcript').value.trim();
+  if(!src){$('tlSt').className='st err';$('tlSt').textContent='אין טקסט לתרגום';return}
+  const b1=$('toEn'),b2=$('toHe');b1.disabled=b2.disabled=true;$('tlSt').className='st';$('tlSt').textContent='מתרגם…';
+  try{
+    const system='Translate the user\'s text into '+target+'. Preserve meaning, tone, names and structure. If it is already in '+target+', return it cleaned up. Return only the translation as plain text with no notes and no markdown.';
+    const out=await claude(system,src,4000);
+    $('translation').textContent=out;cur.translation=out;await putRec(cur);$('tlSt').textContent='';
+  }catch(e){$('tlSt').className='st err';$('tlSt').textContent=e.message||'שגיאה'}
+  finally{b1.disabled=b2.disabled=false}
+}
+
+/* ---------- export / share ---------- */
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC[(c^u[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function zipStore(files,type){
+  const enc=new TextEncoder(),parts=[],central=[];let off=0;
+  for(const f of files){
+    const nm=enc.encode(f.name),crc=crc32(f.data),len=f.data.length;
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(12,0x21,true);
+    lh.setUint32(14,crc,true);lh.setUint32(18,len,true);lh.setUint32(22,len,true);lh.setUint16(26,nm.length,true);
+    parts.push(new Uint8Array(lh.buffer),nm,f.data);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(14,0x21,true);
+    ch.setUint32(16,crc,true);ch.setUint32(20,len,true);ch.setUint32(24,len,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
+    central.push(new Uint8Array(ch.buffer),nm);
+    off+=30+nm.length+len;
+  }
+  const cs=central.reduce((a,p)=>a+p.length,0);
+  const e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...central,new Uint8Array(e.buffer)],{type});
+}
+function wPara(text,o){
+  o=o||{};const heb=/[֐-׿]/.test(text);
+  const rpr=(o.bold?'<w:b/><w:bCs/>':'')+(o.size?'<w:sz w:val="'+o.size+'"/><w:szCs w:val="'+o.size+'"/>':'')+(heb?'<w:rtl/>':'');
+  return '<w:p><w:pPr>'+(heb?'<w:bidi/>':'')+'</w:pPr><w:r>'+(rpr?'<w:rPr>'+rpr+'</w:rPr>':'')+'<w:t xml:space="preserve">'+esc(text)+'</w:t></w:r></w:p>';
+}
+function buildDocx(title,sections){
+  const enc=new TextEncoder();
+  let body=wPara(title,{bold:true,size:36});
+  for(const s of sections){body+=wPara(s.title,{bold:true,size:28});for(const line of s.text.split('\n'))body+=wPara(line)}
+  const doc='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+body+'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>';
+  const ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>';
+  const rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
+  return zipStore([{name:'[Content_Types].xml',data:enc.encode(ct)},{name:'_rels/.rels',data:enc.encode(rels)},{name:'word/document.xml',data:enc.encode(doc)}],'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+}
+function sections(){
+  const s=[];
+  if($('xTr').checked&&$('transcript').value.trim())s.push({title:'תמלול',text:$('transcript').value.trim()});
+  if($('xSum').checked&&$('summary').textContent.trim())s.push({title:'סיכום',text:$('summary').textContent.trim()});
+  if($('xTl').checked&&$('translation').textContent.trim())s.push({title:'תרגום',text:$('translation').textContent.trim()});
+  return s;
+}
+function textFile(base){
+  const s=sections();if(!s.length)return null;
+  const title='הקלטה מ-'+dispName(cur.id),fmt=$('xFmt').value;
+  if(fmt==='docx')return new File([buildDocx(title,s)],base+'.docx',{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+  if(fmt==='md')return new File(['# '+title+'\n\n'+s.map(x=>'## '+x.title+'\n\n'+x.text).join('\n\n')+'\n'],base+'.md',{type:'text/markdown'});
+  if(fmt==='html')return new File(['<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>'+esc(title)+'</title></head><body style="font-family:system-ui,Arial;max-width:720px;margin:2rem auto;line-height:1.7"><h1>'+esc(title)+'</h1>'+s.map(x=>'<h2>'+esc(x.title)+'</h2><div style="white-space:pre-wrap">'+esc(x.text)+'</div>').join('')+'</body></html>'],base+'.html',{type:'text/html'});
+  return new File([title+'\n\n'+s.map(x=>'=== '+x.title+' ===\n'+x.text).join('\n\n')+'\n'],base+'.txt',{type:'text/plain'});
+}
+function collectFiles(){
+  const base='voice_'+fileStamp(cur.id),out=[],tf=textFile(base);
+  if(tf)out.push(tf);
+  if($('xAu').checked)cur.audio.forEach((b,i)=>{const m=baseMime(b.type);out.push(new File([b],base+'-audio'+(cur.audio.length>1?'-'+(i+1):'')+'.'+extOf(m,'audio'),{type:m}))});
+  if($('xVi').checked&&cur.video.length){const m=baseMime(cur.video[0].type);out.push(new File([cur.video[0]],base+'-video.'+extOf(m,'video'),{type:m}))}
+  return out;
+}
+async function doShare(){
+  if(!cur)return;const files=collectFiles();
+  if(!files.length){$('shSt').className='st err';$('shSt').textContent='לא נבחר כלום לשיתוף (או שאין עדיין טקסט)';return}
+  $('shSt').className='st';
+  if(navigator.canShare&&navigator.canShare({files})){
+    try{await navigator.share({files,title:'הקלטה מ-'+dispName(cur.id)});$('shSt').textContent=''}
+    catch(e){if(e&&e.name!=='AbortError'){$('shSt').className='st err';$('shSt').textContent='השיתוף נכשל. נסה "הורד".'}}
+  }else{$('shSt').className='st err';$('shSt').textContent='שיתוף ישיר לא נתמך בדפדפן הזה. השתמש ב"הורד".'}
+}
+function doDownload(){
+  if(!cur)return;const files=collectFiles();
+  if(!files.length){$('shSt').className='st err';$('shSt').textContent='לא נבחר כלום להורדה (או שאין עדיין טקסט)';return}
+  $('shSt').className='st';
+  files.forEach((f,i)=>setTimeout(()=>{const u=URL.createObjectURL(f),a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)},i*400));
+  $('shSt').textContent='מוריד '+files.length+' קבצים…';
+}
+async function doCopy(){
+  const s=sections();if(!s.length){$('shSt').className='st err';$('shSt').textContent='אין טקסט להעתקה';return}
+  try{await navigator.clipboard.writeText(s.map(x=>x.title+'\n'+x.text).join('\n\n'));$('shSt').className='st';$('shSt').textContent='הועתק'}
+  catch(e){$('shSt').className='st err';$('shSt').textContent='ההעתקה נחסמה בדפדפן'}
+}
+
+/* ---------- settings dialog ---------- */
+function openSettings(){
+  $('sCkey').value=cfg.get('ckey','');$('sCmodel').value=cfg.get('cmodel',DEF.cmodel);
+  $('sTbase').value=cfg.get('tbase',DEF.tbase);$('sTkey').value=cfg.get('tkey','');
+  $('sTmodel').value=cfg.get('tmodel',DEF.tmodel);$('sTlang').value=cfg.get('tlang',DEF.tlang);
+  const d=$('dlg');if(!d.open){try{d.showModal()}catch(e){d.setAttribute('open','')}}
+}
+$('setBtn').onclick=openSettings;
+$('sClose').onclick=()=>$('dlg').close();
+$('sSave').onclick=()=>{
+  cfg.set('ckey',$('sCkey').value.trim());cfg.set('cmodel',$('sCmodel').value.trim()||DEF.cmodel);
+  cfg.set('tbase',$('sTbase').value.trim()||DEF.tbase);cfg.set('tkey',$('sTkey').value.trim());
+  cfg.set('tmodel',$('sTmodel').value.trim()||DEF.tmodel);cfg.set('tlang',$('sTlang').value);
+  $('dlg').close();toast('נשמר');
+};
+
+/* ---------- wiring ---------- */
+$('recBtn').onclick=()=>S?stopRec():startRec();
+$('extBtn').onclick=extend;
+$('wantVideo').onchange=e=>{$('facing').hidden=!e.target.checked};
+$('trBtn').onclick=transcribe;
+$('sumBtn').onclick=summarize;
+$('toEn').onclick=()=>translate('English');
+$('toHe').onclick=()=>translate('Hebrew');
+$('shBtn').onclick=doShare;
+$('dlBtn').onclick=doDownload;
+$('cpBtn').onclick=doCopy;
+$('delBtn').onclick=async()=>{
+  if(!cur||!confirm('למחוק את ההקלטה הזו (שמע, וידאו, תמלול וקבצים)?'))return;
+  await delRec(cur.id).catch(()=>{});cur=null;$('selWrap').hidden=true;$('player').removeAttribute('src');await refreshList();
+};
+if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+(async()=>{
+  try{await recoverUnfinished();await refreshList();const recs=(await allRec()).filter(r=>r.status==='done').sort((a,b)=>b.id-a.id);if(recs.length)await select(recs[0].id)}catch(e){}
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+})();
+})();
+</script>
+</body>
+</html>
